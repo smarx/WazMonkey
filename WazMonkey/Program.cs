@@ -28,12 +28,15 @@ namespace WazMonkey
         [Option("s", "slot", Required = true, HelpText = @"The slot (""production"" or ""staging"")")]
         public string Slot { get; set; }
 
+        [Option(null, "reimage", Required = false, HelpText = "Reimage the instance (instead of reboot, the default)")]
+        public bool Reimage { get; set; }
+
         [HelpOption(HelpText = "Display this help screen.")]
         public string GetUsage()
         {
             var help = new HelpText
             {
-                Heading = new HeadingInfo("WazMonkey", "v0.1"),
+                Heading = new HeadingInfo("WazMonkey", "v0.2"),
                 Copyright = new CopyrightInfo("Steve Marx", 2012),
                 AdditionalNewLineAfterOption = true,
                 AddDashesToOption = true
@@ -130,10 +133,10 @@ namespace WazMonkey
 
             // choose one at random
             var instance = instances[new Random().Next(instances.Length)];
-            Console.WriteLine("Rebooting {0}.", instance);
+            Console.WriteLine("{0} {1}.", options.Reimage ? "Reimaging" : "Rebooting", instance);
 
             // reboot it
-            req = (HttpWebRequest)WebRequest.Create(string.Format("{0}/roleinstances/{1}?comp=reboot", baseAddress, instance));
+            req = (HttpWebRequest)WebRequest.Create(string.Format("{0}/roleinstances/{1}?comp={2}", baseAddress, instance, options.Reimage ? "reimage" : "reboot"));
             req.Method = "POST";
             req.ContentLength = 0;
             req.Headers["x-ms-version"] = "2012-03-01";
